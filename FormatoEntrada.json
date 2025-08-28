@@ -1,0 +1,19 @@
+
+
+{
+    "Products": [
+        {
+            "buttonMask" : "B00343",
+            "maskProduct" : "PR00025",
+            "quantity" : 1,
+            "screen" : 0
+        },
+
+        {
+            "buttonMask" : "B00343",
+            "maskProduct" : "PR00109",
+            "quantity" : 1,
+            "screen" : 0
+        }
+    ]
+}
