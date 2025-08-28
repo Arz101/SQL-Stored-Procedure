@@ -1,0 +1,10 @@
+{
+    "GroupModifiers" : [
+        {
+            "maskModGroup" : "",
+            "price" : 1,
+            "mandatory": 1,
+            "isEnabled": 0
+        }
+    ]
+}

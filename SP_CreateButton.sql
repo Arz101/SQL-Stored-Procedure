@@ -15,7 +15,7 @@ ALTER PROCEDURE [dbo].[SP_CREATEBUTTON]
     @untilDate DATE,
     @specificDate DATE,
     @enabledDays INT,
-    @Products NVARCHAR(MAX) 
+    @Products NVARCHAR(MAX) = NULL
 AS
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM [dbo].[buttons] WHERE [buttonMask] = @buttonMask)
@@ -38,43 +38,51 @@ BEGIN
                 @untilDate,
                 @specificDate
             )
-
-            -- Tabla temparal para manejar los productos del botón
-            DECLARE @tempProducts TABLE(
-                id INT IDENTITY(1,1) PRIMARY KEY,
-                maskProduct CHAR(8),
-                quantity INT,
-                screen INT
-            )
-
-            -- Insertar los productos desde el JSON a la tabla temporal
-            INSERT INTO @tempProducts (maskProduct, quantity, screen)
-            SELECT maskProduct, quantity, screen
-            FROM OPENJSON(@Products, '$.Products')
-            WITH (
-                maskProduct CHAR(8) '$.maskProduct',
-                quantity INT '$.quantity',
-                screen INT '$.screen'
-            )
-
-            -- Insertar los productos desde la tabla temporal a buttonProducts
-            DECLARE @i INT = 1, @max INT, @maskProduct CHAR(8), @quantity INT, @screen INT
-            SELECT @max = COUNT(*) FROM @tempProducts
-
-            -- Recorrer la tabla temporal e insertar en buttonProducts
-            WHILE @i <= @max -- Desde 1 hasta el número maximo de productos
+            
+            -- Si se proporcionan productos, se insertan en buttonProducts
+            IF @Products IS NOT NULL
             BEGIN
-                SELECT @maskProduct = maskProduct, @quantity = quantity, @screen = screen
-                FROM @tempProducts WHERE id = @i
+            -- Tabla temparal para manejar los productos del botón
+                DECLARE @tempProducts TABLE(
+                    id INT IDENTITY(1,1) PRIMARY KEY,
+                    maskProduct CHAR(8),
+                    quantity INT,
+                    screen INT
+                )
 
-                INSERT INTO [dbo].[buttonProducts]
-                ([buttonMask], [maskProduct], [quantity], [screen])
-                VALUES
-                (@buttonMask, @maskProduct, @quantity, @screen)
+                -- Insertar los productos desde el JSON a la tabla temporal
+                INSERT INTO @tempProducts (maskProduct, quantity, screen)
+                SELECT maskProduct, quantity, screen
+                FROM OPENJSON(@Products, '$.Products')
+                WITH (
+                    maskProduct CHAR(8) '$.maskProduct',
+                    quantity INT '$.quantity',
+                    screen INT '$.screen'
+                )
 
-                SET @i = @i + 1
+                -- Insertar los productos desde la tabla temporal a buttonProducts
+                DECLARE @i INT = 1, @max INT, @maskProduct CHAR(8), @quantity INT, @screen INT
+                SELECT @max = COUNT(*) FROM @tempProducts
+
+                -- Recorrer la tabla temporal e insertar en buttonProducts
+                WHILE @i <= @max -- Desde 1 hasta el número maximo de productos
+                BEGIN
+                    SELECT @maskProduct = maskProduct, @quantity = quantity, @screen = screen
+                    FROM @tempProducts WHERE id = @i
+
+                    INSERT INTO [dbo].[buttonProducts]
+                    ([buttonMask], [maskProduct], [quantity], [screen])
+                    VALUES
+                    (@buttonMask, @maskProduct, @quantity, @screen)
+
+                    SET @i = @i + 1
+                END
+
             END
 
+            ELSE BEGIN
+                PRINT('No products provided for button ' + @buttonMask + '.');
+            END
 
             COMMIT TRANSACTION;
             PRINT('Button ' + @buttonMask + ' created successfully.');
@@ -88,5 +96,9 @@ BEGIN
         END CATCH
     END
 END
+
+-- falta indicar a que Canal y subcanal se asigna el botón creado
+-- Y a que grupo de modificadores se asignara el boton
+
 
 

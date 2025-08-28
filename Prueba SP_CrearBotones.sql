@@ -36,7 +36,7 @@ EXEC [dbo].[SP_CREATEBUTTON]
     @fromDate = '2025-07-01',
     @untilDate = '2025-12-31',
     @specificDate = NULL,
-    @enabledDays = 0,
+    @enabledDays = NULL,
     @Products = '{
         "Products": [
             {
@@ -55,3 +55,37 @@ EXEC [dbo].[SP_CREATEBUTTON]
         ]
     }'
 -- Falta indicar a que Canal y subcanal se asigna el botón creado
+
+--- Asignar subcanal manualmente
+
+
+
+SELECT * FROM buttons
+WHERE buttonMask = 'B00343'
+
+SELECT * FROM ButtonXSubChannel
+where buttonMask = 'B00343'
+
+INSERT INTO ButtonXSubChannel (buttonMask, maskSubChannel, price, isEnabled)
+VALUES ('B00343', 'SCHA00001', 4.15, 1)
+
+update buttons
+set enabledDays = NULL
+where buttonMask = 'B00343'
+
+UPDATE ButtonXSubChannel
+SET isEnabled = 0
+WHERE buttonMask = 'B00343' and maskSubChannel = 'SCHA00001'
+
+
+DELETE FROM buttons
+WHERE buttonMask = 'B00343'
+
+DELETE FROM buttonProducts
+WHERE buttonMask = 'B00343'
+
+SELECT * FROM buttons
+where buttonMask = 'B00343'
+
+select * from ButtonXSubChannel
+where buttonMask = 'B00343'
