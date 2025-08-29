@@ -81,11 +81,89 @@ WHERE buttonMask = 'B00343' and maskSubChannel = 'SCHA00001'
 DELETE FROM buttons
 WHERE buttonMask = 'B00343'
 
-DELETE FROM buttonProducts
+SELECT * FROM buttonProducts
 WHERE buttonMask = 'B00343'
 
-SELECT * FROM buttons
+SELECT * FROM ButtonXSubChannel
 where buttonMask = 'B00343'
 
-select * from ButtonXSubChannel
-where buttonMask = 'B00343'
+DELETE FROM ButtonXSubChannel
+WHERE buttonMask = 'B00343'
+
+select * from subchannels
+
+UPDATE subchannels
+set isEnabled = 0
+where maskSubChannel = 'SCHA00002'
+
+
+EXEC [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
+    @buttonMask = 'B00343',
+    @maskSubChannel = 'SCHA00001',
+    @priceSubChanneel = 4.25,
+    @isEnabled_SubChannel = 0,
+    @Groups = NULL
+
+
+EXEC [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
+    @buttonMask = 'B00343',
+    @SubChannels_Groups = '{
+        "SubChannels" : [
+            {
+                "maskSubChannel" : "SCHA00001",
+                "price" : 4.25,
+                "isEnabled" : 0
+            }
+        ]
+    }'
+
+
+
+EXEC [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
+    @buttonMask = 'B00343',
+    @Groups = '{
+        "GroupModifiers" : [
+            {
+                "maskModGroup" : "GMOD00001",
+                "mandatory" : 0,
+                "isEnabled" : 0
+            }
+        ]
+    }',
+
+    @SubChannels_Groups = '{
+        "SubChannels" : [
+            {
+                "maskSubChannel" : "SCHA00001",
+                "price" : 4.25,
+                "isEnabled" : 0
+            }
+        ]
+    }'
+
+EXEC [dbo].[SP_CREATEBUTTON]
+    @buttonMask = 'B00343',
+    @buttonName = 'COMBO AHORRO',
+    @maskCategory = 'CAT00007',
+    @position = 1,
+    @fromDate = '2025-07-01',
+    @untilDate = '2025-12-31',
+    @specificDate = NULL,
+    @enabledDays = NULL,
+    @Products = '{
+        "Products": [
+            {
+                "buttonMask" : "B00343",
+                "maskProduct" : "PR00025",
+                "quantity" : 1,
+                "screen" : 0
+            },
+
+            {
+                "buttonMask" : "B00343",
+                "maskProduct" : "PR00109",
+                "quantity" : 1,
+                "screen" : 0
+            }
+        ]
+    }'

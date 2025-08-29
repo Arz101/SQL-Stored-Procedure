@@ -2,12 +2,10 @@ USE [JARVISVALLEDULCE]
 
 GO
 
-CREATE PROCEDURE [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
+ALTER PROCEDURE [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
     @buttonMask CHAR(6),
-    @maskSubChannel CHAR(6),
-    @priceSubChanneel DECIMAL(5,2),
-    @isEnabled_SubChannel BIT,
-    @Groups NVARCHAR(MAX) = NULL
+    @Groups NVARCHAR(MAX) = NULL,
+    @SubChannels_Groups NVARCHAR(MAX) = NULL
 AS 
 BEGIN
     IF EXISTS (SELECT 1 FROM [dbo].[buttons] WHERE [buttonMask] = @buttonMask)
@@ -16,9 +14,40 @@ BEGIN
         BEGIN TRY
             BEGIN TRANSACTION
 
-            -- Asignar el botón al subcanal indicado
-            INSERT INTO ButtonXSubChannel (buttonMask, maskSubChannel, price, isEnabled)
-            VALUES (@buttonMask, @maskSubChannel, @priceSubChanneel, @isEnabled_SubChannel)
+            IF @SubChannels_Groups IS NOT NULL
+            BEGIN   
+                ---> IF PARA INGRESAR UN BOTON A VARIOS SUBCHANNELS 
+                DECLARE @SubChannels_Temp TABLE (
+                    id INT IDENTITY(1,1) PRIMARY KEY,
+                    maskSubChannel CHAR(9),
+                    price DECIMAL(5,2),
+                    isEnabled BIT
+                )
+
+                INSERT INTO @SubChannels_Temp (maskSubChannel, price, isEnabled)
+                SELECT maskSubChannel, price, isEnabled
+                FROM OPENJSON(@SubChannels_Groups, '$.SubChannels')
+                WITH(
+                    maskSubChannel CHAR(9) '$.maskSubChannel',
+                    price DECIMAL(5,2) '$.price',
+                    isEnabled BIT '$.isEnabled'
+                )
+
+                DECLARE @_i INT = 1, @_max INT, @_maskSubChannel CHAR(9), @_price DECIMAL(5,2), @_isEnabled BIT
+                SELECT @_max = COUNT(*) FROM @SubChannels_Temp
+
+                WHILE @_i <= @_max
+                BEGIN
+                    SELECT @_maskSubChannel = maskSubChannel, @_price = price, @_isEnabled = isEnabled
+                    FROM @SubChannels_Temp
+                    WHERE id = @_i
+
+                    INSERT INTO [dbo].[ButtonXSubChannel] ([buttonMask], [maskSubChannel], [price], [isEnabled])
+                    VALUES (@buttonMask, @_maskSubChannel, @_price, @_isEnabled)
+
+                    SET @_i = @_i + 1
+                END
+            END
 
             -- Si se proporciona un grupo de modificadores, asignar los modificadores al botón
             IF @Groups IS NOT NULL
@@ -27,28 +56,26 @@ BEGIN
                 DECLARE @tempModifiersGroups TABLE(
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     maskModGroup CHAR(9),
-                    price DECIMAL(5,2),
                     mandatory BIT,
                     isEnabled BIT
                 )
 
                 -- Insertar los grupos de modificadores desde el JSON a la tabla temporal
-                INSERT INTO @tempModifiersGroups (maskModGroup, price, isEnabled)
-                SELECT maskModGroup, price, isEnabled
+                INSERT INTO @tempModifiersGroups (maskModGroup, mandatory, isEnabled)
+                SELECT maskModGroup, mandatory, isEnabled
                 FROM OPENJSON(@Groups, '$.GroupModifiers')
                 WITH (
                     maskModGroup CHAR(9) '$.maskModGroup',
-                    price DECIMAL(5,2) '$.price',
                     mandatory BIT '$.mandatory',
                     isEnabled BIT '$.isEnabled'
                 )
 
-                DECLARE @i INT = 1, @max INT, @maskModGroup CHAR(9), @price DECIMAL(5,2), @isEnabled BIT, @mandatory BIT
+                DECLARE @i INT = 1, @max INT, @maskModGroup CHAR(9), @isEnabled BIT, @mandatory BIT
                 SELECT @max = COUNT(*) FROM @tempModifiersGroups
 
                 WHILE @i <= @max
                 BEGIN
-                    SELECT @maskModGroup = maskModGroup, @price = price, @mandatory = mandatory, @isEnabled = isEnabled
+                    SELECT @maskModGroup = maskModGroup, @mandatory = mandatory, @isEnabled = isEnabled
                     FROM @tempModifiersGroups
                     WHERE id = @i
 
@@ -60,6 +87,8 @@ BEGIN
             END
 
             COMMIT TRANSACTION;
+
+            PRINT('SUCCESSFULLY')
         END TRY
         BEGIN CATCH
             ROLLBACK TRANSACTION;
@@ -76,4 +105,3 @@ END
 
 ----- Asignar el boton a un grupo de modificadores 
 
-SELECT * FROM groupXButtons

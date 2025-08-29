@@ -29,15 +29,7 @@ BEGIN
             ([buttonMask], [buttonName], [maskCategory],
             [position], [enabledDays], [fromDate], [untilDate], [specificDate])
 
-            VALUES(@buttonMask,
-                @buttonName,
-                @maskCategory,
-                @position,
-                @enabledDays,
-                @fromDate,
-                @untilDate,
-                @specificDate
-            )
+            VALUES(@buttonMask, @buttonName, @maskCategory, @position, @enabledDays, @fromDate, @untilDate, @specificDate)
             
             -- Si se proporcionan productos, se insertan en buttonProducts
             IF @Products IS NOT NULL
