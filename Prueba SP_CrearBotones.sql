@@ -97,14 +97,7 @@ set isEnabled = 0
 where maskSubChannel = 'SCHA00002'
 
 
-EXEC [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
-    @buttonMask = 'B00343',
-    @maskSubChannel = 'SCHA00001',
-    @priceSubChanneel = 4.25,
-    @isEnabled_SubChannel = 0,
-    @Groups = NULL
-
-
+-- Probar SP para agregar el boton a un subchannel
 EXEC [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
     @buttonMask = 'B00343',
     @SubChannels_Groups = '{
@@ -118,7 +111,7 @@ EXEC [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
     }'
 
 
-
+-- Agregar boton a subcanal con modificador
 EXEC [dbo].[SP_SubChannel_and_GroupXButton_Assignment]
     @buttonMask = 'B00343',
     @Groups = '{
