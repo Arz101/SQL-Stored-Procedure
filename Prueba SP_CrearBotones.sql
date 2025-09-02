@@ -160,3 +160,21 @@ EXEC [dbo].[SP_CREATEBUTTON]
             }
         ]
     }'
+
+SELECT * FROM buttons
+WHERE buttonMask = 'B00343'
+
+EXEC [dbo].[SP_Modify_Button_Info]
+    @buttonMask = 'B00343',
+    @data = '{
+        "Button": [
+            {
+                "buttonName" : "NEW NAME",
+                "maskCategory" : "CAT00001",
+                "position" : 1,
+                "fromDate" : "2025-08-01",
+                "untilDate" : "2025-09-01"
+            }
+        ]
+    }'
+

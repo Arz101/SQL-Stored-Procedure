@@ -7,7 +7,7 @@ USE [JARVISVALLEDULCE]
 
 GO
 -- -> Asignar Nuevos Productos a un Boton
-CREATE PROCEDURE [dbo].[SP_Modify_Button_Info]
+ALTER PROCEDURE [dbo].[SP_Modify_Button_Info]
     @buttonMask CHAR(6),
     @data NVARCHAR(MAX)
 AS
@@ -20,7 +20,7 @@ BEGIN
             
             DECLARE @Button TABLE(
                 id INT IDENTITY(1,1) PRIMARY KEY,
-                buttonName CHAR(7),
+                buttonName VARCHAR(50),
                 maskCategory CHAR(8),
                 position INT,
                 fromDate DATE,
@@ -33,7 +33,7 @@ BEGIN
             SELECT buttonName, maskCategory, [position], fromDate, untilDate, specificDate, enabledDays
             FROM OPENJSON(@data, '$.Button')
             WITH(
-                buttonName CHAR(7) '$.buttonName',
+                buttonName VARCHAR(50) '$.buttonName',
                 maskCategory CHAR(8) '$.maskCategory',
                 position INT '$.position',
                 fromDate DATE '$.fromDate',
@@ -42,7 +42,7 @@ BEGIN
                 enabledDays TINYINT '$.enabledDays'
             )
             
-            DECLARE @buttonName CHAR(7), @maskCategory CHAR(8), @position INT, @fromDate DATE,
+            DECLARE @buttonName VARCHAR(50), @maskCategory CHAR(8), @position INT, @fromDate DATE,
              @untilDate DATE, @specificDate DATE, @enabledDays TINYINT
 
             SELECT @buttonName = buttonName, @maskCategory = maskCategory, @position = [position], @fromDate = fromDate,
