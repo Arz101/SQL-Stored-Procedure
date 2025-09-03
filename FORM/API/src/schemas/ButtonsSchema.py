@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 from typing import Union
-from .ProductsSchema import ButtonXProduct
+from .ButtonXProduct import ButtonXProduct
 
 
 class CreateButton(BaseModel):

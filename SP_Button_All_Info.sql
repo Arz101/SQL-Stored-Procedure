@@ -4,7 +4,7 @@
 -- Description: Get button Info
 -- =============================================================
 
-USE [JARVISVALLEDULCE]
+USE [JARVISPOSVALLEDULCEPRUEBA]
 
 SELECT * FROM buttons
 WHERE buttonName LIKE '%30'
@@ -73,3 +73,5 @@ GO
 EXEC dbo.GET_BUTTON_INFO
     @ButtonMask = 'B00031',
     @maskChannel = 'CHA00001'
+
+--Falta Informacion 

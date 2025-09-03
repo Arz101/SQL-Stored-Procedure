@@ -1,7 +1,8 @@
 from sqlalchemy import text, select
 from sqlalchemy.orm import Session
 from ..utils.SQL_Connection import engine, buttons
-
+from src.schemas import CreateButton
+import json
 
 class ButtonRepo:
     def __init__(self):
@@ -13,28 +14,23 @@ class ButtonRepo:
                 result = conn.execute(text(
                     F"""
                         EXEC dbo.GET_BUTTON_INFO
-                            @ButtonMask = {buttonMask},
-                            @maskChannel = {maskChannel}
+                            @ButtonMask = '{buttonMask}',
+                            @maskChannel = '{maskChannel}'
                     """
                 ))
 
-                return result.scalar_one_or_none()
+                row = result.fetchone()
+
+                if row and row[0]:
+                    return json.loads(row[0])
+                return None
             except Exception as e:
                 raise e
 
-    def metadata_test(self):
-        with Session(engine) as conn:
-            try:
-                result = conn.execute(
-                    select(buttons).where(buttons.c.buttonMask == "B00031")
-                )
-                return result.all()
-            except Exception as e:
-                raise(e)
-
-repo = ButtonRepo()
-
-data = repo.get_buttons_info('B00031', 'CHA00001')
-print(data)
+    
+    def getProducts(self):
+        ...
 
     
+    def insert_button(self, CreateButton: CreateButton):
+        ...
